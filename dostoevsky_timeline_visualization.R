@@ -151,3 +151,8 @@ timeline_plot <- ggplot(romans_data) +
 
 # Шаг 4. Вывод графика
 print(timeline_plot)
+
+# Шаг 5. Сохранение графика
+ggsave("output/plots/dostoevsky_timeline.png", 
+       plot = characters_plot, 
+       width = 8, height = 5)
