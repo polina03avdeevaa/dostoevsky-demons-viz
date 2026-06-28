@@ -112,3 +112,9 @@ graph_characters <- ggraph(g,
   )
 
 print(graph_characters)
+
+
+# Шаг 8. Сохранение 
+ggsave("output/plots/demons_network.png", 
+       plot = characters_plot, 
+       width = 8, height = 5)
