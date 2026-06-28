@@ -1,4 +1,4 @@
-# Визуалихация хронологии публикации романов Достоевского
+# Визуализация хронологии публикации романов Достоевского
 
 # Шаг 0. Загрузка пакетов
 library(ggplot2)
@@ -6,6 +6,8 @@ library(dplyr)
 library(lubridate)
 library(forcats)
 library(showtext)
+library(svglite)
+
 
 # Шаг 1. Подготовка данных о романах
 romans_data <- data.frame(
@@ -63,6 +65,7 @@ romans_data <- data.frame(
     )
   )
 
+
 # Шаг 2. Подключение шрифтов
 tryCatch({
   font_add_google("Inter", "Inter")
@@ -70,6 +73,7 @@ tryCatch({
 }, error = function(e) {
   message("Не удалось загрузить шрифты: ", e$message)
 })
+
 
 # Шаг 3. Построение временной шкалы
 timeline_plot <- ggplot(romans_data) +
@@ -107,9 +111,7 @@ timeline_plot <- ggplot(romans_data) +
   labs(
     x = "Год публикации", 
     y = NULL, 
-    fill = NULL,
-    title = "Хронология публикации романов Достоевского",
-    subtitle = "«Великое пятикнижие» выделено тёмным цветом"
+    fill = NULL
   ) +
   # Тема
   theme_minimal(base_family = "Inter") +
@@ -126,33 +128,11 @@ timeline_plot <- ggplot(romans_data) +
     plot.background = element_rect(fill = "#F2EFE9", color = NA),
     panel.background = element_rect(fill = "#F2EFE9", color = NA),
     # Легенда
-    legend.position = "top",
-    legend.justification = "center",
-    legend.text = element_text(color = "#2C2C2C", size = 10),
-    legend.key = element_blank(),
-    legend.margin = margin(b = 5, t = 5),
-    # Заголовки
-    plot.title = element_text(
-      family = "Inter",
-      size = 16, 
-      color = "#2C2C2C",
-      hjust = 0.5, 
-      face = "bold",
-      margin = margin(b = 5, t = 10)
-    ),
-    plot.subtitle = element_text(
-      family = "Inter",
-      size = 11, 
-      color = "#2C2C2C",
-      hjust = 0.5,
-      margin = margin(b = 15)
-    )
+    legend.position = "none"
   )
 
-# Шаг 4. Вывод графика
-print(timeline_plot)
 
-# Шаг 5. Сохранение графика
-ggsave("output/plots/dostoevsky_timeline.png", 
-       plot = characters_plot, 
-       width = 8, height = 5)
+# Шаг 4. Сохранение в SVG (в текущую папку)
+svg_file <- "dostoevsky_timeline.svg"
+svglite(svg_file, width = 8, height = 5, bg = "#F2EFE9")
+print(timeline_plot)
