@@ -1,4 +1,4 @@
-# ВИЗУАЛИЗАЦИЯ СООБЩЕСТВ ПЕРСОНАЖЕЙ РОМАНА «БЕСЫ»
+# Визуализация сообществ персонажей романа «Бесы»
 
 # Шаг 0. Загрузка пакетов
 library(readr)
@@ -29,7 +29,7 @@ make_label <- function(full_name) {
 
 
 # Шаг 2. Загрузка данных о взаимодействиях
-data_file <- "Новая таблица - Взаимодействия.csv"
+data_file <- "character_relationships_weighted.csv"
 if (!file.exists(data_file)) {
   stop("Файл не найден: ", data_file)
 }
@@ -94,15 +94,12 @@ layout_pos <- layout_pos * scale_factor
 layout_pos[,1] <- layout_pos[,1] - mean(layout_pos[,1])
 layout_pos[,2] <- layout_pos[,2] - mean(layout_pos[,2])
 
-# Шаг 8. Сохранение в SVG
-svg_file <- "output/plots/demons_communities.svg"
-svglite(svg_file, width = 6, height = 4, bg = "#EFEBE4")
 
 # Настройка полей
 par(mar = c(1, 1, 2, 1))
 
 
-# Шаг 9. Построение графа
+# Шаг 8. Построение графа
 plot(g_undir,
      layout = layout_pos,
      # Вершины
@@ -133,5 +130,6 @@ title("Сообщества персонажей романа «Бесы»",
       col.main = "#2C2C2C", 
       family = "Inter")
 
-# Шаг 10. Закрытие устройства (файл сохраняется)
-dev.off()
+# Шаг 9. Сохранение в SVG (в текущую папку)
+svg_file <- "demons_communities.svg"
+svglite(svg_file, width = 6, height = 4, bg = "#EFEBE4")
