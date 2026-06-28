@@ -7,6 +7,7 @@ library(igraph)
 library(ggraph)
 library(ggplot2)
 library(ggrepel)
+library(svglite)
 
 
 # Шаг 1. Чтение и предобработка данных 
@@ -68,18 +69,23 @@ node_pos <- data.frame(name = V(g)$name,
                        group = V(g)$group)
 
 
-# Шаг 6. График 
+# Шаг 6. Сохранение в SVG (в текущую папку)
+svg_file <- "demons_network.svg"
+svglite(svg_file, width = 8, height = 6, bg = "#F2EFE9")
+
+
+# Шаг 7. График 
 graph_characters <- ggraph(g, 
-            layout = "manual", 
-            x = node_pos$x, 
-            y = node_pos$y) + 
+                           layout = "manual", 
+                           x = node_pos$x, 
+                           y = node_pos$y) + 
   geom_edge_fan(aes(width = weight, alpha = weight),
                 arrow = arrow(type = "closed", length = unit(1.5, "mm")),
                 end_cap = circle(5, "mm"),
                 start_cap = circle(4, "mm"),
                 color = "#B59D81",       
                 lineend = "round") +
-    geom_node_point(aes(size = log_total, 
+  geom_node_point(aes(size = log_total, 
                       fill = group), 
                   shape = 21, 
                   stroke = 0.4, 
@@ -113,8 +119,5 @@ graph_characters <- ggraph(g,
 
 print(graph_characters)
 
-
-# Шаг 8. Сохранение 
-ggsave("output/plots/demons_network.png", 
-       plot = characters_plot, 
-       width = 8, height = 5)
+# Шаг 8. Закрытие устройства (файл сохраняется)
+dev.off()
