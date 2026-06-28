@@ -6,6 +6,7 @@ library(data.table)
 library(stringr)
 library(ggplot2)
 library(showtext)
+library(svglite)
 
 
 # Шаг 1. Загрузка текста
@@ -93,11 +94,6 @@ find_matches <- function(txt_low) {
 dt[, mentioned := lapply(sentence_lower, find_matches)]
 dt <- dt[sapply(mentioned, length) > 0]
 
-# Проверка наличия данных
-if (nrow(dt) == 0) {
-  stop("Упоминаний не найдено. Проверьте варианты написания имён.")
-}
-
 
 # Шаг 7. Расчёт тональности предложений
 dt[, sentiment := vapply(sentence, get_sentiment_afinn, numeric(1))]
@@ -119,8 +115,7 @@ result <- dt_long[, .(
 ), by = canon]
 
 # Сортировка по убыванию общей тональности
-setorder(result, 
-         -total_sentiment)
+setorder(result, -total_sentiment)
 
 
 # Шаг 10. Подготовка к визуализации
@@ -153,9 +148,7 @@ character_sentiment_plot <- ggplot(plot_data, aes(x = canon, y = total_sentiment
   coord_flip() +
   labs(
     x = NULL, 
-    y = "Суммарная тональность",
-    title = "Тональность персонажей романа «Бесы»",
-    subtitle = "По данным словаря AFINN"
+    y = "Суммарная тональность"
   ) +
   theme_minimal(base_family = "Inter") +
   theme(
@@ -164,16 +157,11 @@ character_sentiment_plot <- ggplot(plot_data, aes(x = canon, y = total_sentiment
     axis.text.y = element_text(color = "#2C2C2C", size = 11, hjust = 1),
     axis.title.x = element_text(color = "#2C2C2C", size = 12),
     plot.background = element_rect(fill = "#F2EFE9", color = NA),
-    panel.background = element_rect(fill = "#F2EFE9", color = NA),
-    plot.title = element_text(
-      family = "Inter", size = 16, color = "#2C2C2C",
-      hjust = 0.5, face = "bold", margin = margin(b = 5, t = 10)
-    ),
-    plot.subtitle = element_text(
-      family = "Inter", size = 11, color = "#2C2C2C",
-      hjust = 0.5, margin = margin(b = 15)
-    )
+    panel.background = element_rect(fill = "#F2EFE9", color = NA)
   )
 
-# Шаг 13. Вывод графика
+
+# Шаг 13. Сохранение в SVG (в текущую папку)
+svg_file <- "demons_character_sentiment.svg"
+svglite(svg_file, width = 7, height = 5, bg = "#F2EFE9")
 print(character_sentiment_plot)
