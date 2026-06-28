@@ -4,7 +4,8 @@
 library(udpipe)
 library(tidyverse)
 library(ggplot2)
-library(stopwords)   
+library(stopwords)
+library(svglite)
 
 
 # Шаг 1. Загрузка модели UDPipe
@@ -63,14 +64,13 @@ keywords <- anno_full |>
 
 print(keywords)
 
- 
+
 # Шаг 7. Визуализация
 keywords_plot <- keywords |> 
   mutate(lemma = factor(lemma, 
                         levels = rev(lemma))) 
 keywords_plot <- keywords_plot |> 
   mutate(color_fill = ifelse(row_number() <= 2, "#2B3B60", "#B59D81"))
-
 
 p2_styled <- ggplot(keywords_plot, aes(y = lemma, 
                                        x = n, 
@@ -94,15 +94,12 @@ p2_styled <- ggplot(keywords_plot, aes(y = lemma,
     axis.text.x = element_blank(),
     axis.ticks.x = element_blank(),
     axis.text.y = element_text(color = "#2C2C2C", size = 11, hjust = 1),
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
-    plot.subtitle = element_text(hjust = 0.5, size = 10),
     plot.background = element_rect(fill = "#F2EFE9", color = NA),
     panel.background = element_rect(fill = "#F2EFE9", color = NA)
   )
 
-print(p2_styled)
 
-# Шаг 8. Сохранение 
-ggsave("output/plots/demons_top_words.png", 
-       plot = characters_plot, 
-       width = 8, height = 5)
+# Шаг 8. Сохранение в SVG (в текущую папку)
+svg_file <- "demons_frequency.svg"
+svglite(svg_file, width = 6, height = 4, bg = "#F2EFE9")
+print(p2_styled)
