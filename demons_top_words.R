@@ -101,3 +101,8 @@ p2_styled <- ggplot(keywords_plot, aes(y = lemma,
   )
 
 print(p2_styled)
+
+# Шаг 8. Сохранение 
+ggsave("output/plots/demons_top_words.png", 
+       plot = characters_plot, 
+       width = 8, height = 5)
