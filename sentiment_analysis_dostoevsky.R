@@ -1,17 +1,14 @@
-# АНАЛИЗ ТОНАЛЬНОСТИ РОМАНОВ ДОСТОЕВСКОГО
+# Анализ тональности романов Достоевского
 
 # Шаг 0. Загрузка пакетов
 library(tidyverse)
 library(udpipe)
 library(rulexicon)
 library(showtext)
-library(knitr)
+library(svglite)
 
 # Шаг 1. Загрузка текстов
 load_text <- function(file_path) {
-  if (!file.exists(file_path)) {
-    stop("Файл не найден: ", file_path)
-  }
   text <- readChar(file_path, file.info(file_path)$size, useBytes = TRUE)
   Encoding(text) <- "UTF-8"
   return(text)
@@ -25,8 +22,7 @@ text_files <- list(
   "The_Adolescent" = "The Adolescent.txt"
 )
 
-texts <- map(text_files, 
-             load_text)
+texts <- map(text_files, load_text)
 
 # Шаг 2. Создание корпуса
 dostoevsky_corpus <- tibble(
@@ -42,10 +38,6 @@ if (!file.exists(model_file)) {
 }
 
 rus <- udpipe_load_model(file = model_file)
-
-if (is.null(rus)) {
-  stop("Не удалось загрузить модель UDPipe")
-}
 
 # Шаг 4. Аннотация (с разбивкой на части для больших текстов)
 annotate_safe <- function(text, doc_id, model, chunk_size = 50000) {
@@ -96,11 +88,6 @@ dostoevsky_sent <- ann_clear |>
   inner_join(afinn, by = "token") |> 
   select(doc_id, token, chunk, score)
 
-# Проверка наличия данных
-if (nrow(dostoevsky_sent) == 0) {
-  warning("Не найдено совпадений со словарем AFINN")
-}
-
 # Шаг 8. Переименование романов
 dostoevsky_total <- dostoevsky_sent |> 
   mutate(doc_id = recode(doc_id,
@@ -121,14 +108,9 @@ sentiment_results <- dostoevsky_total |>
   ) |> 
   arrange(desc(avg_sentiment))
 
-# Вывод таблицы
-knitr::kable(sentiment_results, 
-             caption = "Эмоциональное распределение романов: от самого позитивного к самому негативному")
-
 # Шаг 10. Подготовка к визуализации
 sentiment_results <- sentiment_results |> 
-  mutate(doc_id = fct_reorder(doc_id, 
-                              avg_sentiment))
+  mutate(doc_id = fct_reorder(doc_id, avg_sentiment))
 
 # Шаг 11. Шрифты
 tryCatch({
@@ -140,7 +122,7 @@ tryCatch({
 })
 
 # Шаг 12. График
-ggplot(sentiment_results, aes(y = doc_id, x = avg_sentiment)) +
+sentiment_plot <- ggplot(sentiment_results, aes(y = doc_id, x = avg_sentiment)) +
   geom_col(aes(fill = ifelse(doc_id == "«Бесы»", "#2B3B60", "#B59D81")),
            color = NA, width = 0.7
   ) +
@@ -166,13 +148,10 @@ ggplot(sentiment_results, aes(y = doc_id, x = avg_sentiment)) +
     plot.background = element_rect(fill = "#F2EFE9", 
                                    color = NA),
     panel.background = element_rect(fill = "#F2EFE9", 
-                                    color = NA),
-    plot.title = element_text(
-      family = "Angst", 
-      size = 18, 
-      color = "#2C2C2C",
-      hjust = 0, 
-      face = "bold"
-    ),
-    plot.title.position = "plot"
+                                    color = NA)
   )
+
+# Шаг 13. Сохранение в SVG (в текущую папку)
+svg_file <- "dostoevsky_sentiment.svg"
+svglite(svg_file, width = 7, height = 5, bg = "#F2EFE9")
+print(sentiment_plot)
